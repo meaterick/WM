@@ -15,17 +15,17 @@ void main() async{
 
 class MyApp extends StatelessWidget {
   @override
-    Widget build(BuildContext context) {
-      return MaterialApp(
-          debugShowCheckedModeBanner: false,
-          initialRoute: "/",
-          routes: {"/": (context) => home(),
-            "/signup": (context) => signuphome(),
-            "/login": (context) => loginhome(),
-            "/profile": (context) => profilehome(),
-          }
-      );
-    }
+  Widget build(BuildContext context) {
+    return MaterialApp(
+        debugShowCheckedModeBanner: false,
+        initialRoute: "/",
+        routes: {"/": (context) => home(),
+          "/signup": (context) => signuphome(),
+          "/login": (context) => loginhome(),
+          "/profile": (context) => profilehome(),
+        }
+    );
+  }
 }
 class home extends StatefulWidget {
   @override
@@ -134,12 +134,7 @@ class _home extends State<home> {
                           height: MediaQuery.of(context).size.width / 14,
                           child: ElevatedButton(
                             onPressed: () {
-                              if (FirebaseAuth.instance.currentUser != null) {
-                                Navigator.of(context).pushNamed("/login");
-                                FirebaseAuth.instance.signOut();
-                              } else {
-                                Navigator.of(context).pushNamed("/signup");
-                              }
+                              Navigator.of(context).pushNamed("/signup");
                             },
                             child: const Text(
                               '회원가입',
@@ -193,6 +188,18 @@ class signup extends StatefulWidget {
   State<signup> createState() => _signup();
 }
 class _signup extends State<signup> {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  User? _user;
+
+  @override
+  void initState() {
+    super.initState();
+    _auth.authStateChanges().listen((User? user) {
+      setState(() {
+        _user = user;
+      });
+    });
+  }
 
   var _name = '-'; // Replace this with your code to retrieve the name input
   var _grade = '-'; // Replace this with your code to retrieve the grade input
@@ -200,6 +207,7 @@ class _signup extends State<signup> {
   var _studentNum = '-';
 
   Future<UserCredential> signInWithGoogle() async {
+
     final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
 
     final GoogleSignInAuthentication googleAuth = await googleUser!.authentication;
@@ -239,16 +247,6 @@ class _signup extends State<signup> {
 
   @override
   Widget build(BuildContext context) {
-
-    FirebaseAuth.instance
-        .authStateChanges()
-        .listen((User? user) {
-      if (user == null) {
-
-      } else {
-        Navigator.of(context).pushNamed("/profile");
-      }
-    });
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
@@ -384,17 +382,33 @@ class _signup extends State<signup> {
                       ),
                     ),
                     const SizedBox(height: 20,),
-                    SizedBox(
-                      width: 500,
-                      child: ElevatedButton(
+                    if (_user == null)
+                      ElevatedButton(
                         onPressed: signInWithGoogle,
-                        child: const Text("DONE", style: TextStyle(color: Color(0xff648FFF))),
+                        child: const Text(
+                          "DONE",
+                          style: TextStyle(color: Color(0xff648FFF)),
+                        ),
                         style: ButtonStyle(
                           backgroundColor: MaterialStateProperty.all(Colors.white),
                         ),
-
                       ),
-                    ),
+                    if (_user != null)
+                      SizedBox(
+                        width: 500,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.of(context).pushNamed("/profile");
+                          },
+                          child: const Text(
+                            "DONE",
+                            style: TextStyle(color: Color(0xff648FFF)),
+                          ),
+                          style: ButtonStyle(
+                            backgroundColor: MaterialStateProperty.all(Colors.white),
+                          ),
+                        ),
+                      ),
                   ],
                 ),
               ),
@@ -423,62 +437,143 @@ class _signup extends State<signup> {
 class loginhome extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            Container(
-              width: MediaQuery.of(context).size.width,
-              height: MediaQuery.of(context).size.height / 7,
-              decoration: const BoxDecoration(
-                  color: Color(0xff245FF7),
-                  borderRadius: BorderRadius.only(
-                      bottomLeft: Radius.circular(40.0),
-                      bottomRight: Radius.circular(40.0)
-                  )
-              ),
-            ),
-            const SizedBox(
-              height: 2,
-            ),
-            Flexible(
-              fit: FlexFit.tight,
-              child: Container(
-                padding: EdgeInsets.fromLTRB(MediaQuery.of(context).size.width / 10, 40, MediaQuery.of(context).size.width / 10, 0),
-                width: MediaQuery.of(context).size.width,
-                height: MediaQuery.of(context).size.height,
-                decoration: BoxDecoration(
-                  color: const Color(0xff648FFF),
-                  borderRadius: BorderRadius.circular(40.0),
-                ),
+    return MaterialApp(
+        home: login());
+  }
+}
+class login extends StatefulWidget {
+  @override
+  State<login> createState() => _login();
+}
+class _login extends State<login> {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  User? _user;
+  @override
+  void initState() {
+    super.initState();
+    _auth.authStateChanges().listen((User? user) {
+      setState(() {
+        _user = user;
+      });
+    });
+  }
 
-                child: const Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(style: TextStyle(fontSize: 30, color: Colors.white), "Profile"),
-                  ],
+  Future<UserCredential> signInWithGoogle() async {
+    final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+
+    final GoogleSignInAuthentication googleAuth = await googleUser!.authentication;
+
+    final credential = GoogleAuthProvider.credential(
+      accessToken: googleAuth.accessToken,
+      idToken: googleAuth.idToken,
+    );
+
+    final userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
+
+    return userCredential;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+        home: Scaffold(
+          body: Container(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Container(
+                  width: MediaQuery
+                      .of(context)
+                      .size
+                      .width,
+                  height: MediaQuery
+                      .of(context)
+                      .size
+                      .height / 7,
+                  decoration: const BoxDecoration(
+                      color: Color(0xff245FF7),
+                      borderRadius: BorderRadius.only(
+                          bottomLeft: Radius.circular(40.0),
+                          bottomRight: Radius.circular(40.0)
+                      )
+                  ),
                 ),
-              ),
+                const SizedBox(
+                  height: 2,
+                ),
+                Flexible(
+                  fit: FlexFit.tight,
+                  child: Container(
+                    padding: EdgeInsets.fromLTRB(MediaQuery
+                        .of(context)
+                        .size
+                        .width / 10, 40, MediaQuery
+                        .of(context)
+                        .size
+                        .width / 10, 0),
+                    width: MediaQuery
+                        .of(context)
+                        .size
+                        .width,
+                    height: MediaQuery.of(context).size.height,
+                    decoration: BoxDecoration(
+                      color: const Color(0xff648FFF),
+                      borderRadius: BorderRadius.circular(40.0),
+                    ),
+
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        const Text(
+                            style: TextStyle(fontSize: 16, color: Colors.white),
+                            "World of Medical"
+                        ),
+                        SizedBox(
+                          height: MediaQuery.of(context).size.height / 30,
+                        ),
+                        const Text(
+                            style: TextStyle(fontSize: 50, color: Colors.white),
+                            "Login"
+                        ),
+                        SizedBox(
+                          height: MediaQuery.of(context).size.height / 10,
+                        ),
+                        ElevatedButton(
+                            onPressed: signInWithGoogle,
+                          style: ElevatedButton.styleFrom(
+                            primary: Colors.white,
+                          ),
+                            child: const Text("SignIn with Google", style: TextStyle(color: Color(0xff648FFF))),
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(
+                  height: 3,
+                ),
+                Container(
+                  width: MediaQuery
+                      .of(context)
+                      .size
+                      .width,
+                  height: MediaQuery
+                      .of(context)
+                      .size
+                      .height / 7,
+                  decoration: const BoxDecoration(
+                      color: Color(0xffB4C9FF),
+                      borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(40.0),
+                          topRight: Radius.circular(40.0)
+                      )
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(
-              height: 3,
-            ),
-            Container(
-              width: MediaQuery.of(context).size.width,
-              height: MediaQuery.of(context).size.height / 7,
-              decoration: const BoxDecoration(
-                  color: Color(0xffB4C9FF),
-                  borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(40.0),
-                      topRight: Radius.circular(40.0)
-                  )
-              ),
-            ),
-          ],
-        ),
-      ),
+          ),
+        )
     );
   }
 }
@@ -495,146 +590,21 @@ class profile extends StatefulWidget {
   State<profile> createState() => _profile();
 }
 class _profile extends State<profile> {
-    @override
-    Widget build(BuildContext context) {
-      return MaterialApp(
-        home: Scaffold(
-          body: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Stack(
-                  children: [
-                    Container(
-                      width: MediaQuery.of(context).size.width,
-                      height: MediaQuery.of(context).size.height / 1.16,
-                      decoration: BoxDecoration(
-                        color: const Color(0xffB4C9FF),
-                        borderRadius: BorderRadius.circular(50.0),
-                      ),
-                    ),
-                    Container(
-                      width: MediaQuery.of(context).size.width,
-                      height: MediaQuery.of(context).size.height / 1.21,
-                      decoration: BoxDecoration(
-                          color: const Color(0xff648FFF),
-                          borderRadius: BorderRadius.circular(50.0),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.white.withOpacity(0.01),
-                              blurRadius: 5.0,
-                              spreadRadius: 0.0,
-                              offset: const Offset(0, 7),
-                            )
-                          ]),
-                    ),
-                    Container(
-                      padding: EdgeInsets.fromLTRB(
-                          MediaQuery.of(context).size.width / 4,
-                          40,
-                          MediaQuery.of(context).size.width / 4,
-                          0),
-                      width: MediaQuery.of(context).size.width,
-                      height: MediaQuery.of(context).size.height / 1.28,
-                      decoration: BoxDecoration(
-                          color: const Color(0xff245FF7),
-                          borderRadius: BorderRadius.circular(40.0),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.white.withOpacity(0.01),
-                              blurRadius: 5.0,
-                              spreadRadius: 0.0,
-                              offset: const Offset(0, 7),
-                            )
-                          ]),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            "교내보건 시스템 진화 프로젝트",
-                            style: TextStyle(fontSize: 15, color: Colors.white),
-                          ),
-                          const Text(
-                            "제일가는\n보건실",
-                            style: TextStyle(
-                              fontSize: 30,
-                              fontWeight: FontWeight.bold,
-                              height: 1.3,
-                              color: Colors.white,
-                            ),
-                          ),
-                          SizedBox(
-                            height: MediaQuery.of(context).size.width / 23,
-                          ),
-                          SizedBox(
-                            width: MediaQuery.of(context).size.width / 2,
-                            height: MediaQuery.of(context).size.width / 14,
-                            child: ElevatedButton(
-                              onPressed: () {
-                                Navigator.of(context).pushNamed("/signup");
-                              },
-                              child: const Text(
-                                '로그인',
-                                style: TextStyle(color: Color(0xff245FF7)),
-                              ),
-                              style: ButtonStyle(
-                                backgroundColor:
-                                MaterialStateProperty.all<Color>(Colors.white),
-                                shape: MaterialStateProperty.all(
-                                  RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(
-                            height: 5,
-                          ),
-                          SizedBox(
-                            width: MediaQuery.of(context).size.width / 2,
-                            height: MediaQuery.of(context).size.width / 14,
-                            child: ElevatedButton(
-                              onPressed: () {
-                                Navigator.of(context).pushNamed("/signup");
-                              },
-                              child: const Text(
-                                '회원가입',
-                                style: TextStyle(color: Color(0xff245FF7)),
-                              ),
-                              style: ButtonStyle(
-                                backgroundColor:
-                                MaterialStateProperty.all<Color>(Colors.white),
-                                shape: MaterialStateProperty.all(
-                                  RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          const Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                'World of Medical',
-                                style: TextStyle(
-                                  fontSize: 15,
-                                  color: Colors.white60,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
+
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text("SD"),
+            ]
+          )
         ),
-      );
-    }
+      ),
+    );
+  }
 }
