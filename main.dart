@@ -188,18 +188,18 @@ class signup extends StatefulWidget {
   State<signup> createState() => _signup();
 }
 class _signup extends State<signup> {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  User? _user;
-
-  @override
-  void initState() {
-    super.initState();
-    _auth.authStateChanges().listen((User? user) {
-      setState(() {
-        _user = user;
-      });
-    });
-  }
+  // final FirebaseAuth _auth = FirebaseAuth.instance;
+  // User? _user;
+  //
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   _auth.authStateChanges().listen((User? user) {
+  //     setState(() {
+  //       _user = user;
+  //     });
+  //   });
+  // }
 
   var _name = '-'; // Replace this with your code to retrieve the name input
   var _grade = '-'; // Replace this with your code to retrieve the grade input
@@ -295,7 +295,6 @@ class _signup extends State<signup> {
                         style: const TextStyle(fontSize: 20),
                         decoration: const InputDecoration(
                           hintText: '홍길동',
-
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.all(Radius.circular(15)),
                             borderSide: BorderSide.none,
@@ -318,7 +317,6 @@ class _signup extends State<signup> {
                         controller: signuptext_grade,
                         style: const TextStyle(fontSize: 20),
                         decoration: const InputDecoration(
-                          hintText: '1',
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.all(Radius.circular(15)),
                             borderSide: BorderSide.none,
@@ -341,7 +339,6 @@ class _signup extends State<signup> {
                         controller: signuptext_classNum,
                         style: const TextStyle(fontSize: 20),
                         decoration: const InputDecoration(
-                          hintText: '1',
 
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.all(Radius.circular(15)),
@@ -365,8 +362,6 @@ class _signup extends State<signup> {
                         controller: signuptext_studentNum,
                         style: const TextStyle(fontSize: 20),
                         decoration: const InputDecoration(
-                          hintText: '1',
-
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.all(Radius.circular(15)),
                             borderSide: BorderSide.none,
@@ -382,18 +377,21 @@ class _signup extends State<signup> {
                       ),
                     ),
                     const SizedBox(height: 20,),
-                    if (_user == null)
-                      ElevatedButton(
-                        onPressed: signInWithGoogle,
-                        child: const Text(
-                          "DONE",
-                          style: TextStyle(color: Color(0xff648FFF)),
-                        ),
-                        style: ButtonStyle(
-                          backgroundColor: MaterialStateProperty.all(Colors.white),
+                    if (FirebaseAuth.instance.currentUser == null)
+                      SizedBox(
+                        width: 500,
+                        child: ElevatedButton(
+                          onPressed: signInWithGoogle,
+                          child: const Text(
+                            "DONE----",
+                            style: TextStyle(color: Color(0xff648FFF)),
+                          ),
+                          style: ButtonStyle(
+                            backgroundColor: MaterialStateProperty.all(Colors.white),
+                          ),
                         ),
                       ),
-                    if (_user != null)
+                    if (FirebaseAuth.instance.currentUser != null)
                       SizedBox(
                         width: 500,
                         child: ElevatedButton(
@@ -446,16 +444,14 @@ class login extends StatefulWidget {
   State<login> createState() => _login();
 }
 class _login extends State<login> {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  User? _user;
-  @override
-  void initState() {
-    super.initState();
-    _auth.authStateChanges().listen((User? user) {
-      setState(() {
-        _user = user;
-      });
-    });
+  FirebaseAuth auth = FirebaseAuth.instance;
+
+  checkGoogleLogin() {
+    User? user = auth.currentUser;
+    bool islogined;
+    islogined = (user != null);
+
+    return islogined;
   }
 
   Future<UserCredential> signInWithGoogle() async {
@@ -539,13 +535,24 @@ class _login extends State<login> {
                         SizedBox(
                           height: MediaQuery.of(context).size.height / 10,
                         ),
-                        ElevatedButton(
+                        if (checkGoogleLogin() == true)
+                          ElevatedButton(
                             onPressed: signInWithGoogle,
                           style: ElevatedButton.styleFrom(
                             primary: Colors.white,
                           ),
                             child: const Text("SignIn with Google", style: TextStyle(color: Color(0xff648FFF))),
                         )
+                        else
+                          ElevatedButton(
+                            onPressed: () {
+                              Navigator.of(context, rootNavigator: true).pushNamed("/profile");
+                            },
+                            style: ElevatedButton.styleFrom(
+                              primary: Colors.white,
+                            ),
+                            child: const Text("SignIn with Google-", style: TextStyle(color: Color(0xff648FFF))),
+                          )
                       ],
                     ),
                   ),
