@@ -537,7 +537,9 @@ class _login extends State<login> {
                         ),
                         if (checkGoogleLogin() == true)
                           ElevatedButton(
-                            onPressed: signInWithGoogle,
+                            onPressed: () {
+                              Navigator.of(context, rootNavigator: true).pushNamed("/profile");
+                            },
                           style: ElevatedButton.styleFrom(
                             primary: Colors.white,
                           ),
@@ -545,9 +547,7 @@ class _login extends State<login> {
                         )
                         else
                           ElevatedButton(
-                            onPressed: () {
-                              Navigator.of(context, rootNavigator: true).pushNamed("/profile");
-                            },
+                            onPressed: signInWithGoogle,
                             style: ElevatedButton.styleFrom(
                               primary: Colors.white,
                             ),
@@ -605,12 +605,114 @@ class _profile extends State<profile> {
       home: Scaffold(
         body: Center(
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text("SD"),
-            ]
-          )
+          verticalDirection: VerticalDirection.up,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            SizedBox(
+              height: MediaQuery.of(context).size.height,
+              child: Stack(
+                children: [
+                  Positioned(
+                    bottom: MediaQuery.of(context).size.height / 11,
+                    child: Container(
+                      padding: EdgeInsets.fromLTRB(
+                        MediaQuery.of(context).size.width / 4,
+                        40,
+                        MediaQuery.of(context).size.width / 4,
+                        0,
+                      ),
+                      width: MediaQuery.of(context).size.width,
+                      height: MediaQuery.of(context).size.height / 1.2,
+                      decoration: BoxDecoration(
+                        color: const Color(0xff245FF7),
+                        borderRadius: BorderRadius.circular(40.0),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.white.withOpacity(0.01),
+                            blurRadius: 5.0,
+                            spreadRadius: 0.0,
+                            offset: const Offset(0, 7),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    bottom: MediaQuery.of(context).size.height / 16,
+                    child: Container(
+                      width: MediaQuery.of(context).size.width,
+                      height: MediaQuery.of(context).size.height / 1.2,
+                      decoration: BoxDecoration(
+                        color: const Color(0xff648FFF),
+                        borderRadius: BorderRadius.circular(50.0),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.white.withOpacity(0.01),
+                            blurRadius: 5.0,
+                            spreadRadius: 0.0,
+                            offset: const Offset(0, 7),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    bottom: MediaQuery.of(context).size.height / 30,
+                    child: Container(
+                      width: MediaQuery.of(context).size.width,
+                      height:  MediaQuery.of(context).size.height / 1.2,
+                      decoration: BoxDecoration(
+                        color: const Color(0xffB4C9FF),
+                        borderRadius: BorderRadius.circular(50.0),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.white.withOpacity(0.01),
+                            blurRadius: 5.0,
+                            spreadRadius: 0.0,
+                            offset: const Offset(0, 7),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    bottom: 0,
+                    child: Container(
+                      width: MediaQuery.of(context).size.width,
+                      height: MediaQuery.of(context).size.height / 1.2,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(50.0),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.white.withOpacity(0.01),
+                            blurRadius: 5.0,
+                            spreadRadius: 0.0,
+                            offset: const Offset(0, 7),
+                          ),
+                        ],
+                      ),
+                      child: const Column(
+                        children: [
+                          SizedBox(
+                            child: Text("현석이", style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              height: 1.3,
+                              color: Colors.red,
+                            ),),
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
+
+      ),
       ),
     );
   }
